@@ -1,24 +1,24 @@
-const botonEliminarTodo = document.getElementById("eliminarTodo");
+.historial-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
 
-botonEliminarTodo.addEventListener("click", function() {
+.boton-eliminar-todo {
+    background: #dc6868;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
 
-    if (movimientos.length === 0) {
-        alert("No tienes movimientos para eliminar.");
-        return;
-    }
-
-    const confirmar = confirm(
-        "¿Estás seguro de que deseas eliminar TODOS tus movimientos? Esta acción no se puede deshacer."
-    );
-
-    if (confirmar) {
-        movimientos = [];
-
-        guardarDatos();
-        actualizarResumen();
-        mostrarMovimientos();
-
-        alert("Todos los movimientos fueron eliminados.");
-    }
-
-});
+.boton-eliminar-todo:hover {
+    background: #b93d3d;
+    transform: translateY(-2px);
+}

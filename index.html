@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Gastos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Control de Gastos</h1>
+        <p>Administra tu dinero de forma sencilla</p>
+    </header>
+
+    <main>
+        <section class="resumen">
+            <div class="tarjeta">
+                <h3>Ingresos</h3>
+                <p id="totalIngresos">$0</p>
+            </div>
+
+            <div class="tarjeta">
+                <h3>Gastos</h3>
+                <p id="totalGastos">$0</p>
+            </div>
+
+            <div class="tarjeta saldo">
+                <h3>Saldo disponible</h3>
+                <p id="saldo">$0</p>
+            </div>
+        </section>
+
+        <section class="formulario">
+            <h2>Registrar movimiento</h2>
+
+            <form id="formMovimiento">
+                <label>Tipo de movimiento</label>
+                <select id="tipo" required>
+                    <option value="ingreso">Ingreso</option>
+                    <option value="gasto">Gasto</option>
+                </select>
+
+                <label>Descripción</label>
+                <input type="text" id="descripcion" placeholder="Ej. Mercado" required>
+
+                <label>Categoría</label>
+                <select id="categoria" required>
+                    <option value="Alimentación">Alimentación</option>
+                    <option value="Transporte">Transporte</option>
+                    <option value="Educación">Educación</option>
+                    <option value="Servicios">Servicios</option>
+                    <option value="Otros">Otros</option>
+                </select>
+
+                <label>Valor (COP)</label>
+                <input type="number" id="valor" min="1" step="1" required>
+
+                <button type="submit">Guardar movimiento</button>
+            </form>
+        </section>
+
+        <section class="historial">
+            <h2>Historial de movimientos</h2>
+            <div id="listaMovimientos"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Control de Gastos © 2026</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,7 +1,13 @@
 const formulario = document.getElementById("formMovimiento");
 const lista = document.getElementById("listaMovimientos");
 
-let movimientos = JSON.parse(localStorage.getItem("movimientos")) || [];
+let movimientos = [];
+
+try {
+    movimientos = JSON.parse(localStorage.getItem("movimientos")) || [];
+} catch (error) {
+    movimientos = [];
+}
 
 const formatoCOP = new Intl.NumberFormat("es-CO", {
     style: "currency",
@@ -25,21 +31,16 @@ function actualizarResumen() {
         }
     });
 
-    document.getElementById("totalIngresos").textContent =
-        formatoCOP.format(ingresos);
-
-    document.getElementById("totalGastos").textContent =
-        formatoCOP.format(gastos);
-
-    document.getElementById("saldo").textContent =
-        formatoCOP.format(ingresos - gastos);
+    document.getElementById("totalIngresos").textContent = formatoCOP.format(ingresos);
+    document.getElementById("totalGastos").textContent = formatoCOP.format(gastos);
+    document.getElementById("saldo").textContent = formatoCOP.format(ingresos - gastos);
 }
 
 function mostrarMovimientos() {
     lista.innerHTML = "";
 
     if (movimientos.length === 0) {
-        lista.innerHTML = "<p>Aún no tienes movimientos registrados.</p>";
+        lista.textContent = "Aún no tienes movimientos registrados.";
         return;
     }
 
@@ -48,37 +49,24 @@ function mostrarMovimientos() {
         elemento.className = "movimiento";
 
         const informacion = document.createElement("div");
-
-        const descripcion = document.createElement("strong");
-        descripcion.textContent = movimiento.descripcion;
-
-        const detalle = document.createElement("p");
-        detalle.textContent = movimiento.categoria + " · " + movimiento.fecha;
-
-        informacion.appendChild(descripcion);
-        informacion.appendChild(detalle);
+        informacion.textContent = movimiento.descripcion + " - " + movimiento.categoria + " - " + movimiento.fecha;
 
         const valor = document.createElement("span");
         valor.className = movimiento.tipo;
-        valor.textContent =
-            (movimiento.tipo === "ingreso" ? "+ " : "- ") +
-            formatoCOP.format(movimiento.valor);
+        valor.textContent = (movimiento.tipo === "ingreso" ? "+ " : "- ") + formatoCOP.format(movimiento.valor);
 
         const boton = document.createElement("button");
         boton.textContent = "Eliminar";
         boton.type = "button";
 
-        boton.addEventListener("click", () => {
+        boton.addEventListener("click", function() {
             movimientos.splice(indice, 1);
             guardarDatos();
             actualizarResumen();
             mostrarMovimientos();
         });
 
-        elemento.appendChild(informacion);
-        elemento.appendChild(valor);
-        elemento.appendChild(boton);
-
+        elemento.append(informacion, valor, boton);
         lista.appendChild(elemento);
     });
 }
@@ -92,25 +80,25 @@ formulario.addEventListener("submit", function(evento) {
     const valor = Number(document.getElementById("valor").value);
 
     if (!descripcion || !Number.isSafeInteger(valor) || valor <= 0) {
-        alert("Por favor, ingresa una descripción y un valor válido.");
+        alert("Escribe una descripción y un valor válido.");
         return;
     }
 
-    const movimiento = {
-        tipo: tipo,
-        descripcion: descripcion,
-        categoria: categoria,
-        valor: valor,
+    movimientos.push({
+        tipo,
+        descripcion,
+        categoria,
+        valor,
         fecha: new Date().toLocaleDateString("es-CO")
-    };
-
-    movimientos.push(movimiento);
+    });
 
     guardarDatos();
     actualizarResumen();
     mostrarMovimientos();
 
     formulario.reset();
+
+    alert("¡Movimiento guardado correctamente!");
 });
 
 actualizarResumen();

@@ -3,178 +3,173 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#087b35">
-  <title>Control de Gastos</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#07552f">
+  <title>Control de Gastos | Tu dinero, en tus manos</title>
   <link rel="stylesheet" href="style.css">
-  <script src="script.js" defer></script>
 </head>
 <body>
-  <div class="app-shell">
-    <aside class="sidebar">
-      <a class="brand" href="#inicio" aria-label="Control de Gastos, inicio">
-        <span class="brand-art">👛</span>
-        <span>Control<br>de <b>Gastos</b></span>
-      </a>
+  <aside class="sidebar">
+    <a class="brand" href="#inicio">
+      <span class="brand-wallet">👛</span>
+      <span>Control<br>de <b>Gastos</b></span>
+    </a>
+    <nav class="menu" aria-label="Navegación principal">
+      <a class="menu-link active" href="#inicio"><span>⌂</span> Inicio</a>
+      <a class="menu-link" href="#historial"><span>◷</span> Historial</a>
+      <a class="menu-link" href="#categorias"><span>▥</span> Estadísticas</a>
+      <a class="menu-link" href="#consejo"><span>⚙</span> Consejos</a>
+    </nav>
+    <div class="sidebar-tip" id="consejo">
+      <div class="tip-icon">💡</div>
+      <h3>Consejo</h3>
+      <p>Revisa tus gastos regularmente para acercarte a tus metas.</p>
+      <div class="tip-growth">📈</div>
+    </div>
+    <div class="sidebar-footer">🍃 Organiza · Planifica · Ahorra</div>
+  </aside>
 
-      <nav class="side-nav" aria-label="Navegación principal">
-        <a class="nav-link active" href="#inicio"><span>⌂</span> Inicio</a>
-        <a class="nav-link" href="#historial"><span>◷</span> Historial</a>
-        <a class="nav-link" href="#categorias"><span>▥</span> Estadísticas</a>
-        <a class="nav-link" href="#consejo"><span>⚙</span> Configuración</a>
-      </nav>
-
-      <div class="side-tip" id="consejo">
-        <div class="tip-title">💡 Consejo:</div>
-        <p>Revisa tus gastos regularmente para alcanzar tus metas.</p>
-        <div class="tip-chart" aria-hidden="true">📈</div>
-        <div class="tip-coins" aria-hidden="true">🪙🪙</div>
+  <main class="main-content" id="inicio">
+    <header class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">🍃 MI ESPACIO FINANCIERO</span>
+        <h1>Control de <span>Gastos</span></h1>
+        <h2>Administra tu dinero de forma sencilla</h2>
+        <p>Registra tus ingresos y gastos, conoce tu saldo y toma mejores decisiones financieras.</p>
       </div>
-    </aside>
+      <div class="hero-art" aria-label="Alcancía y monedas" role="img">
+        <span class="leaf leaf-one">🌿</span>
+        <span class="pig">🐷</span>
+        <span class="coins">🪙 🪙</span>
+        <span class="calculator">🧮</span>
+      </div>
+      <div class="hello-pill">👋 ¡Hola!</div>
+    </header>
 
-    <main class="main-content" id="inicio">
-      <header class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">TU BIENESTAR FINANCIERO</p>
-          <h1>Control de <span>Gastos</span></h1>
-          <h2>Administra tu dinero de forma sencilla</h2>
-          <p class="hero-description">Registra tus ingresos y gastos, conoce tu saldo y toma mejores decisiones financieras.</p>
+    <section class="summary-grid" aria-label="Resumen financiero">
+      <article class="summary-card income-card">
+        <div class="coin coin-down">↓</div>
+        <div class="summary-info">
+          <h3>Ingresos</h3>
+          <p id="totalIngresos">$0</p>
+          <small>↙ Dinero recibido</small>
         </div>
-        <div class="hero-illustration" role="img" aria-label="Alcancía, monedas y calculadora">
-          <span class="coin coin-one">🪙</span>
-          <span class="pig">🐷</span>
-          <span class="coin-stack">🪙🪙🪙</span>
-          <span class="calculator">🧮</span>
+      </article>
+      <article class="summary-card expense-card">
+        <div class="coin coin-up">↑</div>
+        <div class="summary-info">
+          <h3>Gastos</h3>
+          <p id="totalGastos">$0</p>
+          <small>↗ Dinero utilizado</small>
         </div>
-        <div class="user-pill">👤 ¡Hola!</div>
-      </header>
+      </article>
+      <article class="summary-card balance-card">
+        <div class="wallet-illustration">👛</div>
+        <div class="summary-info">
+          <h3>Saldo disponible</h3>
+          <p id="saldo">$0</p>
+          <small>✦ Tu dinero, en orden</small>
+        </div>
+      </article>
+    </section>
 
-      <section class="summary-grid" aria-label="Resumen financiero">
-        <article class="summary-card income-card">
-          <div class="summary-icon">⬇️</div>
-          <div>
-            <p>Ingresos</p>
-            <strong id="totalIngresos">$0</strong>
-            <small>↗ Dinero que recibes</small>
-          </div>
+    <section class="panel category-panel" id="categorias">
+      <div class="section-heading green-heading">
+        <div><span class="heading-icon">◔</span><h2>Resumen de gastos por categoría</h2></div>
+        <span class="period-label">Este mes</span>
+      </div>
+      <div class="category-grid">
+        <article class="category-card food">
+          <div class="category-icon">🍎</div><h3>Alimentación</h3>
+          <p id="total-alimentacion">$0</p>
+          <div class="progress-row"><div class="progress-track"><span id="barra-alimentacion"></span></div><b id="porcentaje-alimentacion">0%</b></div>
         </article>
-        <article class="summary-card expense-card">
-          <div class="summary-icon">⬆️</div>
-          <div>
-            <p>Gastos</p>
-            <strong id="totalGastos">$0</strong>
-            <small>↘ Dinero que utilizas</small>
-          </div>
+        <article class="category-card transport">
+          <div class="category-icon">🚗</div><h3>Transporte</h3>
+          <p id="total-transporte">$0</p>
+          <div class="progress-row"><div class="progress-track"><span id="barra-transporte"></span></div><b id="porcentaje-transporte">0%</b></div>
         </article>
-        <article class="summary-card balance-card">
-          <div class="wallet-icon">👛</div>
-          <div>
-            <p>Saldo Disponible</p>
-            <strong id="saldo">$0</strong>
-            <small>✦ Tu dinero, en orden</small>
-          </div>
+        <article class="category-card education">
+          <div class="category-icon">🎓</div><h3>Educación</h3>
+          <p id="total-educacion">$0</p>
+          <div class="progress-row"><div class="progress-track"><span id="barra-educacion"></span></div><b id="porcentaje-educacion">0%</b></div>
         </article>
-      </section>
+        <article class="category-card services">
+          <div class="category-icon">💡</div><h3>Servicios</h3>
+          <p id="total-servicios">$0</p>
+          <div class="progress-row"><div class="progress-track"><span id="barra-servicios"></span></div><b id="porcentaje-servicios">0%</b></div>
+        </article>
+        <article class="category-card other">
+          <div class="category-icon">🛍️</div><h3>Otros</h3>
+          <p id="total-otros">$0</p>
+          <div class="progress-row"><div class="progress-track"><span id="barra-otros"></span></div><b id="porcentaje-otros">0%</b></div>
+        </article>
+      </div>
+    </section>
 
-      <section class="panel category-panel" id="categorias">
-        <div class="panel-heading category-heading">
-          <div><span class="heading-icon">◔</span><h2>Resumen de Gastos por Categoría</h2></div>
-          <span class="period-pill">Todos los movimientos</span>
+    <div class="work-grid">
+      <section class="panel form-panel">
+        <div class="section-heading form-heading">
+          <div><span class="heading-icon">✚</span><div><h2>Registrar movimiento</h2><p>Agrega un nuevo ingreso o gasto.</p></div></div>
+          <span class="form-art">👛🪙</span>
         </div>
-        <div class="category-grid">
-          <article class="category-card food">
-            <span class="category-emoji">🍎</span><h3>Alimentación</h3>
-            <strong id="cat-Alimentación">$0</strong>
-            <div class="progress-row"><div class="progress-track"><span id="bar-Alimentación"></span></div><b id="pct-Alimentación">0%</b></div>
-          </article>
-          <article class="category-card transport">
-            <span class="category-emoji">🚙</span><h3>Transporte</h3>
-            <strong id="cat-Transporte">$0</strong>
-            <div class="progress-row"><div class="progress-track"><span id="bar-Transporte"></span></div><b id="pct-Transporte">0%</b></div>
-          </article>
-          <article class="category-card education">
-            <span class="category-emoji">🎓</span><h3>Educación</h3>
-            <strong id="cat-Educación">$0</strong>
-            <div class="progress-row"><div class="progress-track"><span id="bar-Educación"></span></div><b id="pct-Educación">0%</b></div>
-          </article>
-          <article class="category-card services">
-            <span class="category-emoji">💡</span><h3>Servicios</h3>
-            <strong id="cat-Servicios">$0</strong>
-            <div class="progress-row"><div class="progress-track"><span id="bar-Servicios"></span></div><b id="pct-Servicios">0%</b></div>
-          </article>
-          <article class="category-card others">
-            <span class="category-emoji">🛍️</span><h3>Otros</h3>
-            <strong id="cat-Otros">$0</strong>
-            <div class="progress-row"><div class="progress-track"><span id="bar-Otros"></span></div><b id="pct-Otros">0%</b></div>
-          </article>
-        </div>
-      </section>
-
-      <section class="workspace-grid">
-        <section class="panel form-panel">
-          <div class="panel-heading form-heading">
-            <div><span class="heading-icon plus-icon">+</span><div><h2>Registrar Movimiento</h2><p>Agrega un nuevo ingreso o gasto.</p></div></div>
-            <span class="heading-decoration" aria-hidden="true">💰</span>
-          </div>
-
-          <form id="formMovimiento" class="movement-form">
-            <div class="form-row">
-              <fieldset class="type-field">
-                <legend>Tipo de Movimiento</legend>
-                <div class="type-options">
-                  <label class="type-option income-option"><input type="radio" name="tipo" value="ingreso" checked><span>⬇ Ingreso</span></label>
-                  <label class="type-option expense-option"><input type="radio" name="tipo" value="gasto"><span>⬆ Gasto</span></label>
-                </div>
-              </fieldset>
-              <label class="field-label" for="categoria">Categoría
-                <select id="categoria" name="categoria" required>
-                  <option value="Alimentación">🍎 Alimentación</option>
-                  <option value="Transporte">🚙 Transporte</option>
-                  <option value="Educación">🎓 Educación</option>
-                  <option value="Servicios">💡 Servicios</option>
-                  <option value="Otros">🛍️ Otros</option>
-                </select>
-              </label>
+        <form id="formMovimiento">
+          <div class="form-row">
+            <div class="field">
+              <label for="tipo">Tipo de movimiento</label>
+              <select id="tipo" required>
+                <option value="ingreso">↓ Ingreso</option>
+                <option value="gasto">↑ Gasto</option>
+              </select>
             </div>
-
-            <div class="form-row bottom-row">
-              <label class="field-label description-field" for="descripcion">Descripción
-                <input id="descripcion" name="descripcion" type="text" maxlength="90" placeholder="✏️ Ej. Mercado, salario..." required>
-              </label>
-              <label class="field-label value-field" for="valor">Valor (COP)
-                <input id="valor" name="valor" type="text" inputmode="numeric" autocomplete="off" placeholder="🪙 Ej. 100,000" required>
-              </label>
+            <div class="field">
+              <label for="categoria">Categoría</label>
+              <select id="categoria" required>
+                <option value="Alimentación">🍎 Alimentación</option>
+                <option value="Transporte">🚗 Transporte</option>
+                <option value="Educación">🎓 Educación</option>
+                <option value="Servicios">💡 Servicios</option>
+                <option value="Otros">🛍️ Otros</option>
+              </select>
             </div>
-            <button class="save-button" type="submit">▣ &nbsp; Guardar Movimiento</button>
-            <p class="form-note" id="formMensaje" role="status" aria-live="polite"></p>
-          </form>
-        </section>
-
-        <section class="panel history-panel" id="historial">
-          <div class="panel-heading history-heading">
-            <div><span class="heading-icon">◷</span><div><h2>Historial de Movimientos</h2><p>Consulta y administra tus registros.</p></div></div>
-            <button class="view-all-button" id="verTodos" type="button">Ver todos →</button>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Tipo</th><th>Valor</th><th>Acciones</th></tr></thead>
-              <tbody id="listaMovimientos"><tr><td colspan="6" class="empty-state">Aún no tienes movimientos registrados.</td></tr></tbody>
-            </table>
+          <div class="form-row">
+            <div class="field">
+              <label for="descripcion">Descripción</label>
+              <input type="text" id="descripcion" placeholder="Ej. Mercado, salario..." maxlength="80" required>
+            </div>
+            <div class="field">
+              <label for="valor">Valor (COP)</label>
+              <input type="text" id="valor" placeholder="Ej. 100.000" inputmode="numeric" autocomplete="off" required>
+            </div>
           </div>
-          <div class="history-actions">
-            <span id="contadorMovimientos">0 movimientos</span>
-            <button type="button" id="eliminarTodo" class="delete-all-button">🗑️ Eliminar todo</button>
-          </div>
-        </section>
+          <button type="submit" class="save-button">▣ &nbsp; Guardar movimiento</button>
+          <p class="form-feedback" id="formFeedback" aria-live="polite"></p>
+        </form>
       </section>
 
-      <footer class="footer">
-        <span>👛 <b>Control de Gastos</b> · Tu dinero, en tus manos.</span>
-        <span>🌿 Organiza · Planifica · Ahorra</span>
-      </footer>
-    </main>
-  </div>
+      <section class="panel history-panel" id="historial">
+        <div class="section-heading history-heading">
+          <div><span class="heading-icon">◷</span><div><h2>Historial de movimientos</h2><p>Consulta y administra tus registros.</p></div></div>
+          <button type="button" id="eliminarTodo" class="delete-all-button">🗑 Eliminar todo</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Tipo</th><th>Valor</th><th>Acciones</th></tr>
+            </thead>
+            <tbody id="listaMovimientos">
+              <tr><td colspan="6" class="empty-state">Aún no tienes movimientos registrados.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <footer class="page-footer">
+      <span>👛 <b>Control de Gastos</b> · Tu dinero, en tus manos.</span>
+      <span>🍃 Organiza · Planifica · Ahorra</span>
+    </footer>
+  </main>
+  <script src="script.js"></script>
 </body>
 </html>

@@ -23,19 +23,18 @@ function cargarMovimientos() {
     const datos = JSON.parse(localStorage.getItem("movimientos")) || [];
 
     return Array.isArray(datos)
-      ? datos.filter(m => (
+      ? datos.filter(m =>
           m &&
           (m.tipo === "ingreso" || m.tipo === "gasto") &&
           typeof m.descripcion === "string" &&
           typeof m.categoria === "string" &&
           Number.isFinite(Number(m.valor)) &&
           Number(m.valor) > 0
-        )).map(m => ({
+        ).map(m => ({
           ...m,
           valor: Number(m.valor)
         }))
       : [];
-
   } catch (error) {
     return [];
   }
@@ -47,10 +46,7 @@ function guardarDatos() {
   try {
     localStorage.setItem("movimientos", JSON.stringify(movimientos));
   } catch (error) {
-    mostrarMensaje(
-      "No se pudieron guardar los datos en este navegador.",
-      true
-    );
+    mostrarMensaje("No se pudieron guardar los datos.", true);
   }
 }
 
@@ -79,17 +75,22 @@ function fechaParaMostrar(fecha) {
   return fecha;
 }
 
+// RESUMEN DE INGRESOS, GASTOS Y SALDO
+
 function actualizarResumen() {
   let ingresos = 0;
   let gastos = 0;
+  let saldo = 0;
 
   movimientos.forEach(movimiento => {
-    if (movimiento.tipo === "ingreso") {
-      ingresos += movimiento.valor;
-    }
+    const valor = Math.abs(Number(movimiento.valor));
 
-    if (movimiento.tipo === "gasto") {
-      gastos += movimiento.valor;
+    if (movimiento.tipo === "ingreso") {
+      ingresos += valor;
+      saldo += valor;
+    } else if (movimiento.tipo === "gasto") {
+      gastos += valor;
+      saldo -= valor;
     }
   });
 
@@ -100,10 +101,12 @@ function actualizarResumen() {
     formatoCOP.format(gastos);
 
   document.getElementById("saldo").textContent =
-    formatoCOP.format(ingresos - gastos);
+    formatoCOP.format(saldo);
 
   actualizarCategorias();
 }
+
+// GASTOS POR CATEGORÍA
 
 function actualizarCategorias() {
   const hoy = new Date();
@@ -154,22 +157,20 @@ function actualizarCategorias() {
 
 function crearCelda(texto, clase = "") {
   const celda = document.createElement("td");
-
   celda.textContent = texto;
 
-  if (clase) {
-    celda.className = clase;
-  }
+  if (clase) celda.className = clase;
 
   return celda;
 }
+
+// MOSTRAR HISTORIAL
 
 function mostrarMovimientos() {
   lista.innerHTML = "";
 
   if (movimientos.length === 0) {
     const fila = document.createElement("tr");
-
     const celda = crearCelda(
       "Aún no tienes movimientos registrados.",
       "empty-state"
@@ -178,31 +179,20 @@ function mostrarMovimientos() {
     celda.colSpan = 6;
     fila.appendChild(celda);
     lista.appendChild(fila);
-
     return;
   }
 
   movimientos.forEach((movimiento, indice) => {
     const fila = document.createElement("tr");
 
-    fila.appendChild(
-      crearCelda(fechaParaMostrar(movimiento.fecha))
-    );
-
-    fila.appendChild(
-      crearCelda(movimiento.descripcion)
-    );
-
-    fila.appendChild(
-      crearCelda(movimiento.categoria)
-    );
+    fila.appendChild(crearCelda(fechaParaMostrar(movimiento.fecha)));
+    fila.appendChild(crearCelda(movimiento.descripcion));
+    fila.appendChild(crearCelda(movimiento.categoria));
 
     const tipoTexto =
       movimiento.tipo === "ingreso" ? "Ingreso" : "Gasto";
 
-    fila.appendChild(
-      crearCelda(tipoTexto, movimiento.tipo)
-    );
+    fila.appendChild(crearCelda(tipoTexto, movimiento.tipo));
 
     const signo =
       movimiento.tipo === "ingreso" ? "+ " : "− ";
@@ -215,7 +205,6 @@ function mostrarMovimientos() {
     );
 
     const celdaAcciones = document.createElement("td");
-
     const boton = document.createElement("button");
 
     boton.type = "button";
@@ -239,12 +228,11 @@ function mostrarMovimientos() {
 
     celdaAcciones.appendChild(boton);
     fila.appendChild(celdaAcciones);
-
     lista.appendChild(fila);
   });
 }
 
-// FORMATO AUTOMÁTICO DE MILES CON PUNTOS
+// FORMATO AUTOMÁTICO DE MILES
 
 campoValor.addEventListener("input", function () {
   const posicionAnterior =
@@ -284,22 +272,23 @@ campoValor.addEventListener("input", function () {
   this.setSelectionRange(nuevaPosicion, nuevaPosicion);
 });
 
-// GUARDAR MOVIMIENTOS
+// REGISTRAR MOVIMIENTOS
 
 formulario.addEventListener("submit", function (evento) {
   evento.preventDefault();
 
   const tipo = document.getElementById("tipo").value;
-
   const descripcion =
     document.getElementById("descripcion").value.trim();
-
   const categoria =
     document.getElementById("categoria").value;
 
-  const valor = Number(
-    campoValor.value.replace(/\D/g, "")
-  );
+  const valor = Number(campoValor.value.replace(/\D/g, ""));
+
+  if (tipo !== "ingreso" && tipo !== "gasto") {
+    mostrarMensaje("Selecciona un tipo de movimiento válido.", true);
+    return;
+  }
 
   if (
     !descripcion ||
@@ -310,16 +299,15 @@ formulario.addEventListener("submit", function (evento) {
       "Escribe una descripción y un valor válido mayor que cero.",
       true
     );
-
     campoValor.focus();
     return;
   }
 
   movimientos.push({
-    tipo,
-    descripcion,
-    categoria,
-    valor,
+    tipo: tipo,
+    descripcion: descripcion,
+    categoria: categoria,
+    valor: valor,
     fecha: obtenerFechaLocal()
   });
 
@@ -344,9 +332,7 @@ botonEliminarTodo.addEventListener("click", () => {
     "¿Seguro que quieres eliminar todos los movimientos? Esta acción no se puede deshacer."
   );
 
-  if (!confirmar) {
-    return;
-  }
+  if (!confirmar) return;
 
   movimientos = [];
 

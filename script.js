@@ -1,266 +1,345 @@
-// ==========================================
-// CONTROL DE GASTOS - SCRIPT.JS
-// ==========================================
+(() => {
+  "use strict";
 
-// Elementos principales
-const formulario = document.getElementById("formMovimiento");
-const lista = document.getElementById("listaMovimientos");
-const botonEliminarTodo = document.getElementById("eliminarTodo");
+  const STORAGE_KEY = "movimientos";
+  const categorias = ["Alimentación", "Transporte", "Educación", "Servicios", "Otros"];
 
-// Cargar movimientos guardados
-let movimientos = JSON.parse(localStorage.getItem("movimientos")) || [];
+  const formulario = document.getElementById("formMovimiento");
+  const campoValor = document.getElementById("valor");
+  const lista = document.getElementById("listaMovimientos");
+  const botonEliminarTodo = document.getElementById("eliminarTodo");
+  const botonVerTodos = document.getElementById("verTodos");
+  const mensaje = document.getElementById("formMensaje");
 
-// Formato de moneda colombiana
-const formatoCOP = new Intl.NumberFormat("es-CO", {
+  const formatoCOP = new Intl.NumberFormat("es-CO", {
     style: "currency",
     currency: "COP",
     maximumFractionDigits: 0
-});
+  });
 
-// ==========================================
-// GUARDAR DATOS
-// ==========================================
+  function cargarMovimientos() {
+    try {
+      const guardados = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      return Array.isArray(guardados) ? guardados.filter(m =>
+        m && (m.tipo === "ingreso" || m.tipo === "gasto") &&
+        typeof m.valor === "number" && Number.isFinite(m.valor)
+      ) : [];
+    } catch (error) {
+      return [];
+    }
+  }
 
-function guardarDatos() {
-    localStorage.setItem("movimientos", JSON.stringify(movimientos));
-}
+  let movimientos = cargarMovimientos();
+  let mostrarTodos = false;
 
-// ==========================================
-// ACTUALIZAR RESUMEN
-// ==========================================
+  function guardarDatos() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(movimientos));
+  }
 
-function actualizarResumen() {
-
-    let ingresos = 0;
-    let gastos = 0;
-
-    movimientos.forEach(movimiento => {
-
-        if (movimiento.tipo === "ingreso") {
-            ingresos += movimiento.valor;
-        } else {
-            gastos += movimiento.valor;
-        }
-
+  // Formato de miles mientras escribes.
+  if (campoValor) {
+    campoValor.addEventListener("input", () => {
+      const digitos = campoValor.value.replace(/\D/g, "");
+      campoValor.value = digitos
+        ? Number(digitos).toLocaleString("en-US")
+        : "";
     });
+  }
 
-    const totalIngresos = document.getElementById("totalIngresos");
-    const totalGastos = document.getElementById("totalGastos");
-    const saldo = document.getElementById("saldo");
+  function obtenerTotales() {
+    return movimientos.reduce((totales, movimiento) => {
+      if (movimiento.tipo === "ingreso") {
+        totales.ingresos += movimiento.valor;
+      }
 
-    if (totalIngresos) {
-        totalIngresos.textContent = formatoCOP.format(ingresos);
-    }
+      if (movimiento.tipo === "gasto") {
+        totales.gastos += movimiento.valor;
+      }
 
-    if (totalGastos) {
-        totalGastos.textContent = formatoCOP.format(gastos);
-    }
+      return totales;
+    }, { ingresos: 0, gastos: 0 });
+  }
 
-    if (saldo) {
-        saldo.textContent = formatoCOP.format(ingresos - gastos);
-    }
+  function actualizarResumen() {
+    const { ingresos, gastos } = obtenerTotales();
 
-    actualizarCategorias();
-}
+    document.getElementById("totalIngresos").textContent =
+      formatoCOP.format(ingresos);
 
-// ==========================================
-// RESUMEN POR CATEGORÍAS
-// ==========================================
+    document.getElementById("totalGastos").textContent =
+      formatoCOP.format(gastos);
 
-function actualizarCategorias() {
+    document.getElementById("saldo").textContent =
+      formatoCOP.format(ingresos - gastos);
 
-    const categorias = [
-        "Alimentación",
-        "Transporte",
-        "Educación",
-        "Servicios",
-        "Otros"
-    ];
+    actualizarCategorias(gastos);
+  }
 
+  // Resumen de gastos por categoría.
+  function actualizarCategorias(totalGastos) {
     categorias.forEach(categoria => {
 
-        const total = movimientos
-            .filter(m =>
-                m.tipo === "gasto" &&
-                m.categoria === categoria
-            )
-            .reduce((suma, m) => suma + m.valor, 0);
+      const totalCategoria = movimientos
+        .filter(m => m.tipo === "gasto" && m.categoria === categoria)
+        .reduce((suma, m) => suma + m.valor, 0);
 
-        const elemento = document.querySelector(
-            `[data-categoria="${categoria}"]`
-        );
+      const porcentaje = totalGastos > 0
+        ? Math.round((totalCategoria / totalGastos) * 100)
+        : 0;
 
-        if (elemento) {
-            elemento.textContent = formatoCOP.format(total);
-        }
+      const valorEl = document.getElementById(`cat-${categoria}`);
+      const barraEl = document.getElementById(`bar-${categoria}`);
+      const porcentajeEl = document.getElementById(`pct-${categoria}`);
 
+      if (valorEl) {
+        valorEl.textContent = formatoCOP.format(totalCategoria);
+      }
+
+      if (barraEl) {
+        barraEl.style.width = `${Math.min(porcentaje, 100)}%`;
+      }
+
+      if (porcentajeEl) {
+        porcentajeEl.textContent = `${porcentaje}%`;
+      }
     });
-}
+  }
 
-// ==========================================
-// MOSTRAR HISTORIAL
-// ==========================================
+  function crearCelda(texto, clase) {
+    const td = document.createElement("td");
 
-function mostrarMovimientos() {
+    if (clase) td.className = clase;
 
+    td.textContent = texto;
+
+    return td;
+  }
+
+  // Mostrar historial.
+  function mostrarMovimientos() {
     if (!lista) return;
 
-    lista.innerHTML = "";
+    lista.replaceChildren();
 
-    if (movimientos.length === 0) {
+    const registros = mostrarTodos
+      ? movimientos
+      : movimientos.slice(-5).reverse();
 
-        lista.innerHTML =
-            "<p>Aún no tienes movimientos registrados.</p>";
+    if (registros.length === 0) {
 
-        return;
-    }
+      const fila = document.createElement("tr");
 
-    movimientos.forEach((movimiento, indice) => {
+      const celda = crearCelda(
+        "Aún no tienes movimientos registrados.",
+        "empty-state"
+      );
 
-        const elemento = document.createElement("div");
-        elemento.className = "movimiento";
+      celda.colSpan = 6;
 
-        const informacion = document.createElement("div");
+      fila.appendChild(celda);
+      lista.appendChild(fila);
 
-        const descripcion = document.createElement("strong");
-        descripcion.textContent = movimiento.descripcion;
+    } else {
 
-        const detalle = document.createElement("p");
-        detalle.textContent =
-            movimiento.categoria + " · " + movimiento.fecha;
+      registros.forEach(movimiento => {
 
-        informacion.appendChild(descripcion);
-        informacion.appendChild(detalle);
+        const indiceReal = movimientos.indexOf(movimiento);
 
-        const valor = document.createElement("span");
+        const fila = document.createElement("tr");
 
-        valor.className = movimiento.tipo;
+        fila.appendChild(crearCelda(movimiento.fecha || "—"));
 
-        valor.textContent =
-            (movimiento.tipo === "ingreso" ? "+ " : "- ") +
-            formatoCOP.format(movimiento.valor);
+        fila.appendChild(crearCelda(
+          movimiento.descripcion || "Sin descripción"
+        ));
 
-        const boton = document.createElement("button");
+        fila.appendChild(crearCelda(
+          movimiento.categoria || "Otros"
+        ));
 
-        boton.textContent = "🗑️";
-        boton.type = "button";
-        boton.className = "boton-eliminar";
+        const tipo = document.createElement("td");
 
-        boton.addEventListener("click", () => {
+        const tipoSpan = document.createElement("span");
 
-            if (confirm("¿Deseas eliminar este movimiento?")) {
+        tipoSpan.className = `type-badge ${movimiento.tipo}`;
 
-                movimientos.splice(indice, 1);
+        tipoSpan.textContent =
+          movimiento.tipo === "ingreso"
+            ? "⬇ Ingreso"
+            : "⬆ Gasto";
 
-                guardarDatos();
-                actualizarResumen();
-                mostrarMovimientos();
+        tipo.appendChild(tipoSpan);
+        fila.appendChild(tipo);
 
-            }
+        fila.appendChild(crearCelda(
+          `${movimiento.tipo === "ingreso" ? "+" : "−"} ${formatoCOP.format(movimiento.valor)}`
+        ));
 
-        });
+        const acciones = document.createElement("td");
 
-        elemento.appendChild(informacion);
-        elemento.appendChild(valor);
-        elemento.appendChild(boton);
+        const eliminar = document.createElement("button");
 
-        lista.appendChild(elemento);
+        eliminar.type = "button";
+        eliminar.className = "delete-one";
+        eliminar.textContent = "🗑️";
 
-    });
-
-}
-
-// ==========================================
-// REGISTRAR INGRESOS Y GASTOS
-// ==========================================
-
-if (formulario) {
-
-    formulario.addEventListener("submit", function(evento) {
-
-        evento.preventDefault();
-
-        const tipo = document.getElementById("tipo").value;
-
-        const descripcion = document
-            .getElementById("descripcion")
-            .value.trim();
-
-        const categoria = document.getElementById("categoria").value;
-
-        const valor = Number(
-            document.getElementById("valor").value
+        eliminar.setAttribute(
+          "aria-label",
+          "Eliminar movimiento"
         );
 
-        if (!descripcion || !Number.isSafeInteger(valor) || valor <= 0) {
+        eliminar.addEventListener("click", () => {
 
-            alert("Por favor, ingresa una descripción y un valor válido.");
+          if (confirm("¿Deseas eliminar este movimiento?")) {
 
-            return;
-        }
-
-        const movimiento = {
-
-            tipo: tipo,
-            descripcion: descripcion,
-            categoria: categoria,
-            valor: valor,
-            fecha: new Date().toLocaleDateString("es-CO")
-
-        };
-
-        movimientos.push(movimiento);
-
-        guardarDatos();
-        actualizarResumen();
-        mostrarMovimientos();
-
-        formulario.reset();
-
-        alert("¡Movimiento registrado correctamente!");
-
-    });
-
-}
-
-// ==========================================
-// ELIMINAR TODO EL HISTORIAL
-// ==========================================
-
-if (botonEliminarTodo) {
-
-    botonEliminarTodo.addEventListener("click", function() {
-
-        if (movimientos.length === 0) {
-
-            alert("No hay movimientos para eliminar.");
-
-            return;
-        }
-
-        const confirmar = confirm(
-            "¿Estás seguro de eliminar TODO el historial? Esta acción no se puede deshacer."
-        );
-
-        if (confirmar) {
-
-            movimientos = [];
+            movimientos.splice(indiceReal, 1);
 
             guardarDatos();
             actualizarResumen();
             mostrarMovimientos();
 
-            alert("El historial se eliminó correctamente.");
+          }
 
+        });
+
+        acciones.appendChild(eliminar);
+        fila.appendChild(acciones);
+
+        lista.appendChild(fila);
+
+      });
+
+    }
+
+    const contador = document.getElementById("contadorMovimientos");
+
+    if (contador) {
+      contador.textContent =
+        `${movimientos.length} ${movimientos.length === 1 ? "movimiento" : "movimientos"}`;
+    }
+
+    if (botonVerTodos) {
+      botonVerTodos.textContent =
+        mostrarTodos ? "Ver menos ↑" : "Ver todos →";
+    }
+  }
+
+  // Registrar movimiento.
+  if (formulario) {
+
+    formulario.addEventListener("submit", evento => {
+
+      evento.preventDefault();
+
+      const tipo =
+        formulario.querySelector('input[name="tipo"]:checked')?.value
+        || "ingreso";
+
+      const descripcion =
+        document.getElementById("descripcion").value.trim();
+
+      const categoria =
+        document.getElementById("categoria").value;
+
+      // Eliminar las comas antes de convertir el valor.
+      const valor = Number(
+        campoValor.value.replace(/,/g, "")
+      );
+
+      if (
+        !descripcion ||
+        !Number.isSafeInteger(valor) ||
+        valor <= 0
+      ) {
+
+        if (mensaje) {
+          mensaje.textContent =
+            "Escribe una descripción y un valor válido mayor que cero.";
+        } else {
+          alert("Escribe una descripción y un valor válido mayor que cero.");
         }
+
+        return;
+      }
+
+      movimientos.push({
+        tipo,
+        descripcion,
+        categoria,
+        valor,
+        fecha: new Date().toLocaleDateString("es-CO")
+      });
+
+      guardarDatos();
+
+      actualizarResumen();
+      mostrarMovimientos();
+
+      formulario.reset();
+
+      if (mensaje) {
+        mensaje.textContent =
+          "¡Movimiento registrado correctamente!";
+      }
 
     });
 
-}
+  }
 
-// ==========================================
-// INICIAR APLICACIÓN
-// ==========================================
+  // Eliminar todo el historial.
+  if (botonEliminarTodo) {
 
-actualizarResumen();
-mostrarMovimientos();
+    botonEliminarTodo.addEventListener("click", () => {
+
+      if (movimientos.length === 0) {
+        alert("No hay movimientos para eliminar.");
+        return;
+      }
+
+      if (confirm(
+        "¿Estás seguro de eliminar TODO el historial? Esta acción no se puede deshacer."
+      )) {
+
+        movimientos = [];
+
+        guardarDatos();
+        actualizarResumen();
+        mostrarMovimientos();
+
+        if (mensaje) {
+          mensaje.textContent =
+            "El historial se eliminó correctamente.";
+        }
+
+      }
+
+    });
+
+  }
+
+  // Botón ver todos.
+  if (botonVerTodos) {
+
+    botonVerTodos.addEventListener("click", () => {
+
+      mostrarTodos = !mostrarTodos;
+
+      mostrarMovimientos();
+
+      if (mostrarTodos) {
+        document.getElementById("historial")
+          .scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+      }
+
+    });
+
+  }
+
+  // Cargar información al abrir la página.
+  actualizarResumen();
+  mostrarMovimientos();
+
+})();
